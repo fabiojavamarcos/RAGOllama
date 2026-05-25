@@ -1,4 +1,7 @@
 # RAGOllama
+
+To run test_rag.py
+
 Example using RAG with ollama
 
 mkdir RAGOllama
@@ -42,3 +45,18 @@ vim test_rag.py
 <copy the code> 
 
 python test_rag.py
+
+-------
+
+To run similarity.py
+
+pip install pandas numpy scikit-learn rapidfuzz sentence-transformers spacy bert-score nltk rouge-score
+python -m spacy download en_core_web_md
+
+CSV file format
+
+text_a,text_b
+"fix database connection error","resolve issue with database connectivity"
+"update login button color","improve neural network model accuracy"
+
+
