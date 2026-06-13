@@ -12,7 +12,7 @@ embed_model = OllamaEmbedding(
 
 # Initialize the LLM with optimized settings
 llm = Ollama(
-    model="llama3.1:latest",  # Confirm with `ollama list`
+    model="llama3.2",  # Confirm with `ollama list`
     request_timeout=300.0,
     temperature=0.1,          # Lower temperature for more factual responses
 )
@@ -23,13 +23,14 @@ Settings.llm = llm
 
 def load_and_index_documents(data_dir="data"):
     """Load documents and create vector index"""
-
+    print("data_dir", data_dir)
     # Check if data directory exists
     if not Path(data_dir).exists():
         raise FileNotFoundError(f"Data directory '{data_dir}' not found. Please create it and add your PDF files.")
 
     # Load documents from the data folder
     docs = SimpleDirectoryReader(data_dir).load_data()
+    print ("docs", docs)
 
     if not docs:
         raise ValueError(f"No documents found in {data_dir}")

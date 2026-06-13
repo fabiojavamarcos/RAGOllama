@@ -1,4 +1,5 @@
 from pathlib import Path
+from pypdf import PdfReader
 from llama_index.core import VectorStoreIndex, SimpleDirectoryReader, Settings
 from llama_index.embeddings.ollama import OllamaEmbedding
 from llama_index.llms.ollama import Ollama
@@ -21,7 +22,37 @@ llm = Ollama(
 Settings.embed_model = embed_model
 Settings.llm = llm
 
-def load_and_index_documents(data_dir="data"):
+CFP_DIR = "data"
+DOCUMENT_DIR = "document"
+
+def read_pdf_text(pdf_path: Path) -> str:
+    """Extract plain text from a PDF file."""
+    reader = PdfReader(str(pdf_path))
+    return "\n".join(
+        page.extract_text() or "" for page in reader.pages
+    ).strip()
+
+def read_document_pdfs(document_dir: str = DOCUMENT_DIR) -> str:
+    """Read all PDF files from the submitted-paper directory."""
+    doc_path = Path(document_dir)
+    if not doc_path.exists():
+        raise FileNotFoundError(
+            f"Document directory '{document_dir}' not found. "
+            "Create it and add the submitted paper PDF."
+        )
+
+    sections = []
+    for pdf_path in sorted(doc_path.glob("*.pdf")):
+        text = read_pdf_text(pdf_path)
+        if text:
+            sections.append(f"--- SUBMITTED PAPER: {pdf_path.name} ---\n{text}")
+
+    if not sections:
+        raise ValueError(f"No PDF documents found in {document_dir}")
+
+    return "\n\n".join(sections)
+
+def load_and_index_documents(data_dir=CFP_DIR):
     """Load documents and create vector index"""
 
     # Check if data directory exists
@@ -60,6 +91,8 @@ def test_rag_system():
 
         # Create query engine
         query_engine = create_query_engine(index)
+
+        paper_text = read_document_pdfs()
 
         # Sample test queries
         test_queries = [
@@ -108,7 +141,11 @@ Conclude with:
 - A balanced synthesis of the paper’s fit to the CfP
 - Key risks and key strengths of the work
 
-Use cautious, formal academic language throughout.''',
+Use cautious, formal academic language throughout.
+
+--- SUBMITTED PAPER ---
+
+''' + paper_text,
         ]
 
         print("RAG System Test Results")
